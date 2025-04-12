@@ -1,9 +1,24 @@
 package main
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"os"
+	"strconv"
+)
+
+const accountBanalnceFile = "balance.txt"
 
 func main() {
-	balance := 1000.0
+	balance, err := readBalanceFromFile()
+
+	if err != nil {
+		fmt.Println("Error!")
+		fmt.Println(err)
+		fmt.Println("----------------")
+		// panic(err)
+	}
+
 	fmt.Println("Welcome to the Bank!")
 	startBank(balance)
 }
@@ -18,22 +33,30 @@ func startBank(balance float64) {
 		fmt.Print("Enter deposit amount: ")
 		var depositAmount float64
 		fmt.Scan(&depositAmount)
-		balance += depositAmount
-		fmt.Printf("Your updated balance is %.4f\n\n", balance)
+		if depositAmount <= 0 {
+			fmt.Println("Enter a valid ampount!")
+		} else {
+			balance += depositAmount
+			fmt.Printf("Your updated balance is %.4f\n\n", balance)
+			writeBalanceToFile(balance)
+		}
 		startBank(balance)
 	case 3:
 		fmt.Print("Enter the amount to withdraw: ")
 		var withdrawAmount float64
 		fmt.Scan(&withdrawAmount)
-		if withdrawAmount > balance {
+		if withdrawAmount <= 0 {
+			fmt.Println("Enter a valid ampount!")
+		} else if withdrawAmount > balance {
 			fmt.Printf("Not enough balance, your current balance is %.4f\n\n", balance)
 		} else {
 			balance -= withdrawAmount
 			fmt.Printf("Your updated balance is %.4f\n\n", balance)
+			writeBalanceToFile(balance)
 		}
 		startBank(balance)
 	default:
-		fmt.Print("Bye bye\n")
+		fmt.Println("Bye bye")
 	}
 }
 
@@ -48,6 +71,24 @@ Enter Your Input: `)
 	return
 }
 
-// func depositMoney(amount float64, balance *float64) {
-// 	balance
-// }
+func writeBalanceToFile(balance float64) {
+	balanceText := fmt.Sprint(balance)
+	os.WriteFile(accountBanalnceFile, []byte(balanceText), 0644)
+}
+
+func readBalanceFromFile() (float64, error) {
+	data, err := os.ReadFile(accountBanalnceFile)
+
+	if err != nil {
+		return 1000, errors.New("failed to find file")
+	}
+
+	balanceText := string(data)
+	balance, err := strconv.ParseFloat(balanceText, 64)
+
+	if err != nil {
+		return 1000, errors.New("failed to parse stored balance")
+	}
+
+	return balance, nil
+}
