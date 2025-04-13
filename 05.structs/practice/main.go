@@ -7,26 +7,98 @@ import (
 	"strings"
 
 	"rishisingh.in/structs/note/note"
+	"rishisingh.in/structs/note/todo"
 )
+
+type saver interface {
+	Save() error
+}
+
+// type printer interface {
+// 	Print()
+// }
+
+type outputable interface {
+	saver
+	Print()
+}
+
+// type outputable interface {
+// 	Save() error
+// 	Print()
+// }
 
 func main() {
 	noteTitle, noteContent := getNoteData()
+	todoText := getUserInput("Enter Todo: ")
+
+	todo, err := todo.New(todoText)
+	if err != nil {
+		printSomething(err)
+		return
+	}
 
 	userNote, err := note.New(noteTitle, noteContent)
-
 	if err != nil {
-		fmt.Println(err)
+		printSomething(err)
 		return
 	}
 
-	userNote.Print()
-	err = userNote.Save()
-
+	err = outputData(todo)
 	if err != nil {
-		fmt.Println("Saving the note failed")
 		return
 	}
-	fmt.Println("Saving the note succeded")
+
+	outputData(userNote)
+	// if err != nil {
+	// 	return
+	// }
+}
+
+func printSomething(data interface{}) {
+	intVal, ok := data.(int)
+	if ok {
+		fmt.Println("Integer:", intVal)
+		return
+	}
+
+	floatVal, ok := data.(float64)
+	if ok {
+		fmt.Println("Float64:", floatVal)
+		return
+	}
+
+	stirngVal, ok := data.(string)
+	if ok {
+		fmt.Println("String:", stirngVal)
+		return
+	}
+	// switch data.(type) {
+	// case string:
+	// 	fmt.Println("String:", data)
+	// case int:
+	// 	fmt.Println("Integer:", data)
+	// case float64:
+	// 	fmt.Println("Float64:", data)
+	// default:
+	// 	fmt.Println(data)
+	// }
+}
+
+func outputData(data outputable) error {
+	data.Print()
+
+	return saveData(data)
+}
+
+func saveData(data saver) error {
+	err := data.Save()
+	if err != nil {
+		printSomething("Saving data failed")
+		return err
+	}
+	printSomething("Saving data succeded")
+	return nil
 }
 
 func getNoteData() (string, string) {

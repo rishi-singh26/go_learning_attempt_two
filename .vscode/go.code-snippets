@@ -23,5 +23,15 @@
 			"fmt.Println($1)"
 		],
 		"description": "Log output to stdio"
+	},
+	"Handle Error": {
+		"scope": "go",
+		"prefix": "err",
+		"body": [
+			"if err != nil {",
+			"fmt.Println(err)",
+			"return",
+			"}"
+		]
 	}
 }
