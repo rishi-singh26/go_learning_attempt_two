@@ -63,3 +63,17 @@ func GetAllEvents() ([]Event, error) {
 	}
 	return events, nil
 }
+
+func GetEventById(id int64) (*Event, error) {
+	query := "SELECT * FROM events where id = ?"
+	row := db.DB.QueryRow(query, id)
+
+	var event Event
+	err := row.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &event.DateTime, &event.UserId)
+	if err != nil {
+		// fmt.Println(err)
+		return nil, err
+	}
+
+	return &event, nil
+}
