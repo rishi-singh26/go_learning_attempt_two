@@ -43,7 +43,6 @@ func createEvent(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": false, "message": "Could not parse request data."})
 		return
 	}
-	event.ID = 1
 	event.UserId = 1
 
 	err = event.Save()
