@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"rishisingh.in/event-manager/models"
+	"rishisingh.in/event-manager/utils"
 )
 
 func getEvents(ctx *gin.Context) {
@@ -37,8 +38,21 @@ func getEvent(ctx *gin.Context) {
 }
 
 func createEvent(ctx *gin.Context) {
+	token := ctx.Request.Header.Get("Authorization")
+
+	if token == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"status": false, "message": "Not authorized."})
+		return
+	}
+
+	err := utils.VerifyToken(token)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": false, "message": "Not authorozed."})
+		return
+	}
+
 	var event models.Event
-	err := ctx.ShouldBindJSON(&event)
+	err = ctx.ShouldBindJSON(&event)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": false, "message": "Could not parse request data."})
 		return
